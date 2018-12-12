@@ -4,17 +4,28 @@ import {
   View,
   Text,
   StyleSheet,
+  TouchableOpacity,
   Dimensions,
   ImageBackground
 } from "react-native";
+
+import moment from "moment";
 import { connect } from "react-redux";
 
-import { dataLoadFetch } from "../../store/actions/index";
+import { dataLoadFetch, dataLoadHourly } from "../../store/actions/index";
 import requestLocationPermission from "../../utils/locationPermission";
+import Loader from "../Loader/Loader";
+import ModalData from "../ModalData/ModalData";
+import toCelsius from "../../utils/toCelsius";
 
 const fone = require("../../assets/img/snow.jpg");
 
 class Home extends PureComponent {
+  state = {
+    timeZona: "d",
+    modalVisible: false
+  };
+
   async componentWillMount() {
     await requestLocationPermission();
   }
@@ -37,12 +48,11 @@ class Home extends PureComponent {
             return res.json();
           })
           .then(data => {
-            // console.log(
-            //   Math.round(((data.currently.apparentTemperature - 32) * 5) / 9) +
-            //     " C"
-            // );
-            console.log(data.daily);
+            // console.log("fetch data", data);
+
+            this.setState({ timeZona: data.timezone });
             this.props.loadedData(data.currently);
+            this.props.loadHourlyData(data.hourly);
           });
       },
       error => this.setState({ error: error.message }),
@@ -50,31 +60,64 @@ class Home extends PureComponent {
     );
   };
 
+  setModalVisible = visible => {
+    this.setState({ modalVisible: visible });
+  };
+  onModalClose = () => {
+    this.setState({ modalVisible: false });
+  };
+
   render() {
-    const dataNow = this.props.dataList.currently;
-    console.log("render props : ", dataNow);
-    return (
-      <ScrollView
-        // horizontal={true}
-        // pagingEnabled={true}
-        contentContainerStyle={styles.container}
-      >
-        <ImageBackground
-          source={fone}
-          style={{ resizeMode: "stretch", ...styles.bgStyle }}
+    const dataNow = this.props.dataList;
+    const Celsius = toCelsius(dataNow.temperature);
+    const formattedDate = moment.unix(dataNow.time).format("YYYY-MM-DD");
+
+    if (dataNow.length !== 0) {
+      return (
+        <ScrollView
+          contentContainerStyle={
+            styles.container // pagingEnabled={true} // horizontal={true}
+          }
         >
-          <View style={styles.content}>
-            <Text style={styles.items}>{dataNow.summary}</Text>
-          </View>
-          <View style={styles.content}>
-            <Text style={styles.items}>
-              kvn dn iurnvuirn uirnv uirnvuirvnnruivnreui nreuiv nreuiv rn
-              rnviurnvuirnvuirvn reuiv nruivn
-            </Text>
-          </View>
-        </ImageBackground>
-      </ScrollView>
-    );
+          <ImageBackground
+            source={fone}
+            style={{ resizeMode: "stretch", ...styles.bgStyle }}
+          >
+            <View style={styles.content}>
+              <Text style={styles.items}>{this.state.timeZona}</Text>
+              <Text style={styles.items}>Дата : {formattedDate}</Text>
+            </View>
+            <View style={styles.content}>
+              <Text style={styles.items}>{dataNow.summary}</Text>
+            </View>
+            <View style={styles.content}>
+              <Text style={styles.items}>Температура : {Celsius}</Text>
+            </View>
+            <View style={styles.content}>
+              <Text style={styles.items}>
+                Скорость ветра : {dataNow.windSpeed} м/с.
+              </Text>
+            </View>
+            <ModalData
+              modalVisible={this.state.modalVisible}
+              onModalClose={this.onModalClose}
+              dataHourly={this.props.dataHourly}
+            />
+            <TouchableOpacity
+              style={styles.btn}
+              activeOpacity={0.7}
+              onPress={() => {
+                this.setModalVisible(true);
+              }}
+            >
+              <Text style={styles.btnText}>Подробнее</Text>
+            </TouchableOpacity>
+          </ImageBackground>
+        </ScrollView>
+      );
+    } else {
+      return <Loader />;
+    }
   }
 }
 
@@ -87,7 +130,8 @@ const styles = StyleSheet.create({
   },
   bgStyle: {
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    height: "100%"
   },
   content: {
     width: Dimensions.get("window").width - 10,
@@ -102,16 +146,33 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(255, 255, 255, 0.4)",
     textShadowOffset: { width: -1, height: 1 },
     textShadowRadius: 10
+  },
+  btn: {
+    alignItems: "center",
+    marginTop: 20,
+    width: 200,
+    backgroundColor: "#DDDDDD",
+    padding: 10
+  },
+  btnText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    fontStyle: "italic"
   }
 });
 
 //REDUX
 
 const mapStateToProps = state => {
-  return { dataList: state.dataLoad };
+  return {
+    dataList: state.dataLoad.currently,
+    dataHourly: state.dataLoadHourly.hourly
+  };
 };
+
 const mapDispatchToProps = dispatch => ({
-  loadedData: val => dispatch(dataLoadFetch(val))
+  loadedData: val => dispatch(dataLoadFetch(val)),
+  loadHourlyData: val => dispatch(dataLoadHourly(val))
 });
 
 export default connect(

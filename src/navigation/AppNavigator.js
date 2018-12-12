@@ -10,14 +10,15 @@ const TabNavigator = createBottomTabNavigator(
   },
   {
     tabBarOptions: {
-      activeTintColor: "tomato",
+      activeTintColor: "white",
+      activeBackgroundColor: "blue",
       style: {
-        backgroundColor: "blue"
+        backgroundColor: "black"
       },
       labelStyle: {
-        fontSize: 16
+        fontSize: 18
       },
-      inactiveTintColor: "gray"
+      inactiveTintColor: "orange"
     }
   }
 );

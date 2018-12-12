@@ -6,7 +6,7 @@ const initialState = {
 
 export default function dataLoad(state = initialState, action) {
   switch (action.type) {
-    case "DATA_API":
+    case DATA_API:
       return { currently: action.payLoad };
     default:
       return state;
