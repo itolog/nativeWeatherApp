@@ -1,4 +1,4 @@
-import { DATA_API, LOAD_HOURLY, LOAD_DAYLY } from "./actionTypes";
+import { DATA_API, LOAD_HOURLY, LOAD_DAILY } from "./actionTypes";
 
 export const dataLoadFetch = payLoad => ({
   type: DATA_API,
@@ -10,7 +10,7 @@ export const dataLoadHourly = payLoad => ({
   payLoad
 });
 
-export const dataLoadDayly = payLoad => ({
-  type: LOAD_DAYLY,
+export const dataLoadDaily = payLoad => ({
+  type: LOAD_DAILY,
   payLoad
 });

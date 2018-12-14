@@ -1,13 +1,26 @@
 import React from "react";
-import { Modal, Text, Button, View, Alert } from "react-native";
+import {
+  Modal,
+  Text,
+  Button,
+  View,
+  Alert,
+  StyleSheet,
+  FlatList,
+  ScrollView
+} from "react-native";
+import { Icon } from "native-base";
 
-import moment from "moment";
+import IconWeather from "../IconWeather/IconWeather";
+import actualData from "../../utils/filterDate";
 import Loader from "../Loader/Loader";
+import moment from "moment";
 
 const ModalData = props => {
   const { summary, data } = props.dataHourly;
-  console.log(props);
+
   if (props.dataHourly.length !== 0) {
+    const temp = Math.round();
     return (
       <View style={{ marginTop: 22 }}>
         <Modal
@@ -18,23 +31,50 @@ const ModalData = props => {
             Alert.alert("Modal has been closed.");
           }}
         >
-          <View style={{ marginTop: 22 }}>
+          <ScrollView style={styles.content}>
             <View>
-              <Text>{summary}</Text>
-              {data.map(val => {
-                return console.log(
-                  moment.unix(val.time).format("YYYY-MM-DD: HH")
-                );
-              })}
+              <View style={styles.title}>
+                <Text style={styles.titleText}>{summary}</Text>
+              </View>
               <View>
-                <Button
-                  onPress={props.onModalClose}
-                  title="Learn More"
-                  color="#841584"
-                  accessibilityLabel="Learn more about this purple button"
+                <FlatList
+                  data={actualData(data)}
+                  keyExtractor={item => item.time.toString()}
+                  renderItem={({ item }) => (
+                    <View id={item.time} style={styles.blockView}>
+                      <Text style={styles.blockViewText}>
+                        Время: {moment.unix(item.time).format("HH:mm")}
+                      </Text>
+                      <View>
+                        <Text style={styles.blockViewText}>
+                          Описание: {item.summary}
+                        </Text>
+                        <IconWeather propIcon={item.icon} styleIcon="black" />
+                      </View>
+                      <Text style={styles.blockViewText}>
+                        Температура: {Math.round(item.temperature)}
+                        <Icon
+                          style={styles.iconStyle}
+                          type="MaterialCommunityIcons"
+                          name="temperature-celsius"
+                        />
+                      </Text>
+                      <Text style={styles.blockViewText}>
+                        Скорость ветра: {Math.round(item.windSpeed)} м/с
+                      </Text>
+                    </View>
+                  )}
                 />
               </View>
             </View>
+          </ScrollView>
+          <View>
+            <Button
+              onPress={props.onModalClose}
+              title="Назад"
+              color="#841584"
+              accessibilityLabel="Learn more about this purple button"
+            />
           </View>
         </Modal>
       </View>
@@ -43,5 +83,35 @@ const ModalData = props => {
     return <Loader />;
   }
 };
+
+const styles = StyleSheet.create({
+  content: {
+    backgroundColor: "#663399"
+  },
+  title: {
+    backgroundColor: "white",
+    padding: 5
+  },
+  titleText: {
+    color: "black",
+    fontSize: 18,
+    fontWeight: "bold"
+  },
+  blockView: {
+    padding: 5,
+    borderColor: "#4FACE4",
+    borderWidth: 2,
+    backgroundColor: "#E6F4FE"
+  },
+  blockViewText: {
+    color: "#006699",
+    fontSize: 15,
+    fontWeight: "bold"
+  },
+  iconStyle: {
+    color: "blue",
+    fontSize: 12
+  }
+});
 
 export default ModalData;

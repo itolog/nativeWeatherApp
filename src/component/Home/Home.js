@@ -8,25 +8,37 @@ import {
   Dimensions,
   ImageBackground
 } from "react-native";
+import { Icon } from "native-base";
 
 import moment from "moment";
 import { connect } from "react-redux";
 
-import { dataLoadFetch, dataLoadHourly } from "../../store/actions/index";
+import {
+  dataLoadFetch,
+  dataLoadHourly,
+  dataLoadDaily
+} from "../../store/actions/index";
+import IconWeather from "../IconWeather/IconWeather";
 import requestLocationPermission from "../../utils/locationPermission";
 import Loader from "../Loader/Loader";
 import ModalData from "../ModalData/ModalData";
-import toCelsius from "../../utils/toCelsius";
 
-const fone = require("../../assets/img/snow.jpg");
+const sunday = require("../../assets/img/sunday.jpg");
+const bunny = require("../../assets/img/bunny.jpg");
+const cloud = require("../../assets/img/cloud.jpg");
+const rain = require("../../assets/img/rain.jpg");
+const smog = require("../../assets/img/smog.jpg");
+const snow = require("../../assets/img/snow.jpg");
 
 class Home extends PureComponent {
   state = {
     timeZona: "d",
+    bgImg: bunny,
     modalVisible: false
   };
 
   async componentWillMount() {
+    // Доступ к геолокации
     await requestLocationPermission();
   }
 
@@ -43,21 +55,56 @@ class Home extends PureComponent {
         const lat = position.coords.latitude;
         const long = position.coords.longitude;
 
-        fetch(`${url}${lat},${long}?lang=ru`)
+        fetch(`${url}${lat},${long}?lang=ru&units=si`)
           .then(res => {
             return res.json();
           })
           .then(data => {
             // console.log("fetch data", data);
 
+            // Cмена фона в зависимости от погоды
+            this.bgChange(data.currently.icon);
             this.setState({ timeZona: data.timezone });
+            //Redux добавления данных
             this.props.loadedData(data.currently);
             this.props.loadHourlyData(data.hourly);
+            this.props.loadDailyData(data.daily);
           });
       },
       error => this.setState({ error: error.message }),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
+  };
+
+  bgChange = code => {
+    switch (code) {
+      case "rain":
+        // Дождь
+        this.setState({ bgImg: rain });
+        break;
+      case "snow":
+        // Снегь
+        this.setState({ bgImg: snow });
+        break;
+      case "fog":
+        // Туман
+        this.setState({ bgImg: smog });
+        break;
+      case "clear-day":
+      case "clear-night":
+        // Солнце
+        this.setState({ bgImg: sunday });
+        break;
+      case "partly-cloudy-day":
+      case "partly-cloudy-night":
+      case "cloudy":
+        // Облочно
+        this.setState({ bgImg: cloud });
+        break;
+      default:
+        this.setState({ bgImg: bunny });
+        break;
+    }
   };
 
   setModalVisible = visible => {
@@ -69,33 +116,49 @@ class Home extends PureComponent {
 
   render() {
     const dataNow = this.props.dataList;
-    const Celsius = toCelsius(dataNow.temperature);
+    const Celsius = Math.round(dataNow.temperature);
+    const apparentTemperature = Math.round(dataNow.apparentTemperature);
+    const windRound = Math.round(dataNow.windSpeed);
     const formattedDate = moment.unix(dataNow.time).format("YYYY-MM-DD");
 
     if (dataNow.length !== 0) {
       return (
-        <ScrollView
-          contentContainerStyle={
-            styles.container // pagingEnabled={true} // horizontal={true}
-          }
-        >
+        <ScrollView contentContainerStyle={styles.container}>
           <ImageBackground
-            source={fone}
+            source={this.state.bgImg}
             style={{ resizeMode: "stretch", ...styles.bgStyle }}
           >
             <View style={styles.content}>
               <Text style={styles.items}>{this.state.timeZona}</Text>
               <Text style={styles.items}>Дата : {formattedDate}</Text>
             </View>
-            <View style={styles.content}>
+            <View style={[styles.content, styles.centred]}>
               <Text style={styles.items}>{dataNow.summary}</Text>
-            </View>
-            <View style={styles.content}>
-              <Text style={styles.items}>Температура : {Celsius}</Text>
+              <IconWeather propIcon={dataNow.icon} styleIcon="white" />
             </View>
             <View style={styles.content}>
               <Text style={styles.items}>
-                Скорость ветра : {dataNow.windSpeed} м/с.
+                Температура : {Celsius}
+                <Icon
+                  style={styles.iconStyle}
+                  type="MaterialCommunityIcons"
+                  name="temperature-celsius"
+                />
+              </Text>
+            </View>
+            <View style={styles.content}>
+              <Text style={styles.items}>
+                Чувствуется как : {apparentTemperature}
+                <Icon
+                  style={styles.iconStyle}
+                  type="MaterialCommunityIcons"
+                  name="temperature-celsius"
+                />
+              </Text>
+            </View>
+            <View style={styles.content}>
+              <Text style={styles.items}>
+                Скорость ветра : {windRound} м/c.
               </Text>
             </View>
             <ModalData
@@ -135,7 +198,7 @@ const styles = StyleSheet.create({
   },
   content: {
     width: Dimensions.get("window").width - 10,
-    backgroundColor: "rgba(93, 47, 117, 0.7)",
+    backgroundColor: "rgba(93, 47, 117, 0.9)",
     borderBottomWidth: 3,
     borderBottomColor: "white"
   },
@@ -158,6 +221,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     fontStyle: "italic"
+  },
+  iconStyle: {
+    color: "white",
+    fontSize: 15
+  },
+  centred: {
+    alignItems: "center"
   }
 });
 
@@ -172,7 +242,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   loadedData: val => dispatch(dataLoadFetch(val)),
-  loadHourlyData: val => dispatch(dataLoadHourly(val))
+  loadHourlyData: val => dispatch(dataLoadHourly(val)),
+  loadDailyData: val => dispatch(dataLoadDaily(val))
 });
 
 export default connect(
