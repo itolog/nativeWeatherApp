@@ -17,7 +17,6 @@ import IconWeather from "../IconWeather/IconWeather";
 
 const Days = props => {
   const { summary, data } = props.dataDaily;
-  console.log("daily props", data);
   return (
     <ScrollView
       contentContainerStyle={
@@ -68,7 +67,7 @@ const Days = props => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#35FFDD"
+    backgroundColor: "black"
   },
   bgStyle: {
     height: Dimensions.get("window").height

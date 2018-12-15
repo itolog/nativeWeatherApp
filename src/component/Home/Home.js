@@ -19,9 +19,9 @@ import {
   dataLoadDaily
 } from "../../store/actions/index";
 import IconWeather from "../IconWeather/IconWeather";
-import requestLocationPermission from "../../utils/locationPermission";
 import Loader from "../Loader/Loader";
 import ModalData from "../ModalData/ModalData";
+import locationAccess from "../../utils/locationAccess";
 
 const sunday = require("../../assets/img/sunday.jpg");
 const bunny = require("../../assets/img/bunny.jpg");
@@ -34,18 +34,14 @@ class Home extends PureComponent {
   state = {
     timeZona: "d",
     bgImg: bunny,
-    modalVisible: false
+    modalVisible: false,
+    errFetch: false,
+    err: false
   };
-
-  async componentWillMount() {
-    // Доступ к геолокации
-    await requestLocationPermission();
-  }
 
   async componentDidMount() {
     await this.getPosition();
   }
-
   // Fetch DATA FROM API
   getPosition = () => {
     navigator.geolocation.getCurrentPosition(
@@ -71,10 +67,39 @@ class Home extends PureComponent {
             this.props.loadDailyData(data.daily);
           });
       },
-      error => this.setState({ error: error.message }),
+      err => {
+        // console.log(err);
+        this.errGeoloc(err);
+      },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
   };
+
+  // Error Axios Geolocation fanction
+  errGeoloc(err) {
+    if (err.message == "No location provider available.") {
+      this.setState({ errFetch: err.message, err: true });
+      // Исправить ф-ция success не срабатывает
+      // поэтому дублируется в error
+      locationAccess()
+        .then(success => {
+          // Запрос на включение Геолокации
+          this.getPosition();
+        })
+        .catch(error => {
+          // Запрос на включение Геолокации
+          this.getPosition();
+        });
+    } else if (err.code === 1) {
+      this.setState({ errFetch: err.message, err: true });
+    } else if (err.code === 2) {
+      this.setState({ errFetch: err.message, err: true });
+    } else if (err.code === 3) {
+      this.setState({ errFetch: err.message, err: true });
+    } else {
+      this.setState({ err: false });
+    }
+  }
 
   bgChange = code => {
     switch (code) {
@@ -178,6 +203,12 @@ class Home extends PureComponent {
           </ImageBackground>
         </ScrollView>
       );
+    } else if (this.state.err) {
+      return (
+        <View style={styles.errContainer}>
+          <Text style={styles.errText}> {this.state.errFetch} </Text>
+        </View>
+      );
     } else {
       return <Loader />;
     }
@@ -228,6 +259,18 @@ const styles = StyleSheet.create({
   },
   centred: {
     alignItems: "center"
+  },
+  errContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: Dimensions.get("window").height,
+    padding: 10
+    // backgroundColor: "black"
+  },
+  errText: {
+    color: "red",
+    fontSize: 20,
+    fontWeight: "bold"
   }
 });
 

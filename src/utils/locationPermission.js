@@ -1,6 +1,6 @@
 import { PermissionsAndroid } from "react-native";
 
-export async function requestLocationPermission() {
+const requestLocationPermission = async () => {
   try {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -11,7 +11,7 @@ export async function requestLocationPermission() {
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       console.log("You can use the location");
-      alert("You can use the location");
+      // alert("You can use the location");
     } else {
       console.log("location permission denied");
       alert("Location permission denied");
@@ -19,4 +19,6 @@ export async function requestLocationPermission() {
   } catch (err) {
     console.warn(err);
   }
-}
+};
+
+export default requestLocationPermission;

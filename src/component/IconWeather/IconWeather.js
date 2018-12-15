@@ -4,7 +4,6 @@ import { Icon } from "native-base";
 
 const IconWeather = props => {
   const { propIcon, styleIcon } = props;
-  console.log(styleIcon);
   if (propIcon == "clear-day" || propIcon == "clear-night") {
     return (
       <View>
