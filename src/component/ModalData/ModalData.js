@@ -20,7 +20,6 @@ const ModalData = props => {
   const { summary, data } = props.dataHourly;
 
   if (props.dataHourly.length !== 0) {
-    const temp = Math.round();
     return (
       <View style={{ marginTop: 22 }}>
         <Modal
@@ -51,7 +50,14 @@ const ModalData = props => {
                         </Text>
                         <IconWeather propIcon={item.icon} styleIcon="black" />
                       </View>
-                      <Text style={styles.blockViewText}>
+                      <Text
+                        style={[
+                          styles.blockViewText,
+                          item.temperature < 0
+                            ? styles.tempMinus
+                            : styles.tepmPlus
+                        ]}
+                      >
                         Температура: {Math.round(item.temperature)}
                         <Icon
                           style={styles.iconStyle}
@@ -111,6 +117,12 @@ const styles = StyleSheet.create({
   iconStyle: {
     color: "blue",
     fontSize: 12
+  },
+  tempMinus: {
+    color: "#05A5D1"
+  },
+  tepmPlus: {
+    color: "orange"
   }
 });
 

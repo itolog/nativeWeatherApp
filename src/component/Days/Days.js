@@ -12,7 +12,6 @@ import { Icon } from "native-base";
 
 import { connect } from "react-redux";
 import moment from "moment";
-import fon from "../../assets/img/bunny.jpg";
 import IconWeather from "../IconWeather/IconWeather";
 
 const Days = props => {
@@ -23,54 +22,49 @@ const Days = props => {
         styles.container // pagingEnabled={true} // horizontal={true}
       }
     >
-      <ImageBackground
-        source={fon}
-        style={{ resizeMode: "stretch", ...styles.bgStyle }}
-      >
-        <View style={styles.title}>
-          <Text style={styles.titleText}>{summary}</Text>
-        </View>
-        <FlatList
-          data={data}
-          keyExtractor={item => item.time.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.content}>
-              <Text style={styles.contentText}>
-                Дата: {moment.unix(item.time).format("DD/M/YYYY")}
-              </Text>
-              <IconWeather propIcon={item.icon} styleIcon="white" />
-              <Text style={styles.contentText}> {item.summary}</Text>
+      <View style={styles.title}>
+        <Text style={styles.titleText}>{summary}</Text>
+      </View>
+      <FlatList
+        data={data}
+        keyExtractor={item => item.time.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.content}>
+            <Text style={styles.contentText}>
+              Дата: {moment.unix(item.time).format("DD/M/YYYY")}
+            </Text>
+            <IconWeather propIcon={item.icon} styleIcon="white" />
+            <Text style={[styles.contentText, styles.contentTextMain]}>
+              {" "}
+              {item.summary}
+            </Text>
 
-              <Text style={styles.contentText}>
-                Мин.Температура : {Math.round(item.temperatureMin)}
-                <Icon
-                  style={styles.iconStyle}
-                  type="MaterialCommunityIcons"
-                  name="temperature-celsius"
-                />
-              </Text>
-              <Text style={styles.contentText}>
-                Макс.Температура : {Math.round(item.temperatureMax)}
-                <Icon
-                  style={styles.iconStyle}
-                  type="MaterialCommunityIcons"
-                  name="temperature-celsius"
-                />
-              </Text>
-            </View>
-          )}
-        />
-      </ImageBackground>
+            <Text style={styles.contentText}>
+              Мин.Температура : {Math.round(item.temperatureMin)}
+              <Icon
+                style={styles.iconStyle}
+                type="MaterialCommunityIcons"
+                name="temperature-celsius"
+              />
+            </Text>
+            <Text style={styles.contentText}>
+              Макс.Температура : {Math.round(item.temperatureMax)}
+              <Icon
+                style={styles.iconStyle}
+                type="MaterialCommunityIcons"
+                name="temperature-celsius"
+              />
+            </Text>
+          </View>
+        )}
+      />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "black"
-  },
-  bgStyle: {
-    height: Dimensions.get("window").height
+    backgroundColor: "#DAE1E8"
   },
   title: {
     padding: 4,
@@ -84,20 +78,25 @@ const styles = StyleSheet.create({
   },
   content: {
     alignSelf: "center",
-    backgroundColor: "#222222",
-    padding: 5,
-    marginBottom: 5,
+    backgroundColor: "#20232A",
+    elevation: 1,
+    padding: 10,
+    marginBottom: 10,
     borderRadius: 10,
     opacity: 0.9,
     width: Dimensions.get("window").width - 10
   },
   contentText: {
-    color: "#EDB32E",
+    color: "#61DAFB",
     borderBottomWidth: 1,
     borderBottomColor: "#61DAFB",
     fontSize: 17,
     fontWeight: "bold",
-    paddingBottom: 4
+    paddingBottom: 8
+  },
+  contentTextMain: {
+    color: "orange",
+    fontSize: 18
   },
   iconStyle: {
     color: "white",

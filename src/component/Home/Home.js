@@ -71,7 +71,7 @@ class Home extends PureComponent {
         // console.log(err);
         this.errGeoloc(err);
       },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+      { enableHighAccuracy: false, timeout: 30000, maximumAge: 300000 }
     );
   };
 
@@ -163,7 +163,12 @@ class Home extends PureComponent {
             </View>
             <View style={styles.content}>
               <Text style={styles.items}>
-                Температура : {Celsius}
+                Температура :{" "}
+                <Text
+                  style={[Celsius < 0 ? styles.tempMinus : styles.tepmPlus]}
+                >
+                  {Celsius}
+                </Text>
                 <Icon
                   style={styles.iconStyle}
                   type="MaterialCommunityIcons"
@@ -173,7 +178,12 @@ class Home extends PureComponent {
             </View>
             <View style={styles.content}>
               <Text style={styles.items}>
-                Чувствуется как : {apparentTemperature}
+                Чувствуется как :{" "}
+                <Text
+                  style={[Celsius < 0 ? styles.tempMinus : styles.tepmPlus]}
+                >
+                  {apparentTemperature}
+                </Text>
                 <Icon
                   style={styles.iconStyle}
                   type="MaterialCommunityIcons"
@@ -271,6 +281,12 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 20,
     fontWeight: "bold"
+  },
+  tempMinus: {
+    color: "#05A5D1"
+  },
+  tepmPlus: {
+    color: "orange"
   }
 });
 

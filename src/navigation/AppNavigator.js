@@ -1,8 +1,9 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { Container, Tab, Tabs, TabHeading, Icon } from "native-base";
 import HomeScreen from "../component/Home/Home";
 import DaysScreen from "../component/Days/Days";
-export default class TabNavigator extends Component {
+
+export default class TabNavigator extends PureComponent {
   render() {
     return (
       <Container>
